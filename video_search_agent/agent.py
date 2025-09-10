@@ -4,6 +4,7 @@ from google.adk.agents import LlmAgent
 
 from video_search_agent.prompts import root_agent_prompt
 from video_search_agent.tools.data_engineer import data_engineer
+from video_search_agent.tools.quiz_generator import quiz_generator
 
 # The main agent for the video search system.
 root_agent = LlmAgent(
@@ -12,6 +13,7 @@ root_agent = LlmAgent(
     instruction=root_agent_prompt.ROOT_AGENT_PROMPT,
     tools=[
         data_engineer,
+        quiz_generator
     ],
     description="An agent that can answer questions about a video library by querying a BigQuery database.",
 )
