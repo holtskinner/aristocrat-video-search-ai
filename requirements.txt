@@ -1,0 +1,13 @@
+google-cloud-aiplatform
+google-cloud-bigquery
+google-generativeai
+python-dotenv
+google-adk
+pandas
+db-dtypes
+google-cloud-speech
+google-cloud-storage
+google-cloud-videointelligence
+pydantic
+pydub
+ffmpeg-python
