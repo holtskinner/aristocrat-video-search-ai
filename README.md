@@ -10,27 +10,27 @@ The system is built around a single, primary agent (`root_agent`) that is respon
 
 ### How it Works
 
-1.  **Receives a Request:** The agent receives a natural language request from the user.
-2.  **Discovers the Schema:** The agent's first step is always to query the database to discover the available tables and their schemas. This prevents the agent from hallucinating table names.
-3.  **Selects a Tool:** Based on the user's request and the database schema, the agent decides which tool to use:
-    *   `get_table_schema`: To get the schema of a table.
-    *   `execute_query`: For standard SQL queries (e.g., keyword searches).
-    *   `semantic_search`: For conceptual or semantic searches.
-4.  **Executes the Tool:** The agent executes the selected tool.
-5.  **Synthesizes the Answer:** The agent takes the results from the tool and synthesizes them into a human-readable answer for the user.
+1. **Receives a Request:** The agent receives a natural language request from the user.
+2. **Discovers the Schema:** The agent's first step is always to query the database to discover the available tables and their schemas. This prevents the agent from hallucinating table names.
+3. **Selects a Tool:** Based on the user's request and the database schema, the agent decides which tool to use:
+    - `get_table_schema`: To get the schema of a table.
+    - `execute_query`: For standard SQL queries (e.g., keyword searches).
+    - `semantic_search`: For conceptual or semantic searches.
+4. **Executes the Tool:** The agent executes the selected tool.
+5. **Synthesizes the Answer:** The agent takes the results from the tool and synthesizes them into a human-readable answer for the user.
 
 This single-agent architecture, combined with a directive prompt, provides a robust and reliable system for video search.
 
 ## Features
 
-*   **Automated Video Ingestion:** Scripts for batch processing and ingesting video files from Google Cloud Storage.
-*   **Deep Video Analysis:** Utilizes the Google Cloud Video Intelligence API for shot change detection, object tracking, speech-to-text transcription, and more.
-*   **Structured Indexing:** Indexes extracted video metadata into Google BigQuery for efficient, structured querying.
-*   **AI Agent:** A conversational agent for interacting with the video search system.
+- **Automated Video Ingestion:** Scripts for batch processing and ingesting video files from Google Cloud Storage.
+- **Deep Video Analysis:** Utilizes the Google Cloud Video Intelligence API for shot change detection, object tracking, speech-to-text transcription, and more.
+- **Structured Indexing:** Indexes extracted video metadata into Google BigQuery for efficient, structured querying.
+- **AI Agent:** A conversational agent for interacting with the video search system.
 
 ## Project Structure
 
-```
+```none
 /
 ├── pyproject.toml          # Project metadata and dependencies
 ├── scripts/                # Data ingestion and processing scripts
@@ -51,26 +51,26 @@ Follow these steps to ingest your videos and index their metadata into BigQuery.
 
 ### Prerequisites
 
-*   Python 3.11+
-*   An active Google Cloud Platform project.
-*   The `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
-*   The following GCP APIs enabled in your project: Cloud Storage, Video Intelligence API, BigQuery API, Vertex AI API.
+- Python 3.11+
+- An active Google Cloud Platform project.
+- The `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
+- The following GCP APIs enabled in your project: Cloud Storage, Video Intelligence API, BigQuery API, Vertex AI API.
 
 ### Step 1: Create GCS Bucket and Upload Videos
 
-1.  **Create a Google Cloud Storage (GCS) bucket.** Choose a unique name for your bucket.
+1. **Create a Google Cloud Storage (GCS) bucket.** Choose a unique name for your bucket.
 
     ```bash
     gsutil mb gs://your-gcs-bucket-name
     ```
 
-2.  **Create a `raw` folder inside your bucket.** This is where you will upload the videos you want to process.
+2. **Create a `raw` folder inside your bucket.** This is where you will upload the videos you want to process.
 
     ```bash
     gsutil mkdir gs://your-gcs-bucket-name/raw
     ```
 
-3.  **Upload your videos** to the `raw` folder.
+3. **Upload your videos** to the `raw` folder.
 
     ```bash
     gsutil -m cp /path/to/your/local/videos/* gs://your-gcs-bucket-name/raw/
@@ -88,8 +88,8 @@ python -m scripts.batch_ingestion \
     --project_id "your-gcp-project-id" \
     --skip_ocr
 ```
-This command will scan the bucket and tell you which videos it plans to process, then ask for confirmation. It's the safest way to start.
 
+This command will scan the bucket and tell you which videos it plans to process, then ask for confirmation. It's the safest way to start.
 
 ### Step 3: Set Up BigQuery Tables
 
@@ -167,24 +167,28 @@ python scripts/test_video_intelligence_stt.py \
 
 ## Running the Video Search AI Agent
 
-1.  **Navigate to the project directory:
+1. **Navigate to the project directory**:
+
     ```bash
     cd /Users/jasonpendleton/Projects/video_search_ai
     ```
 
-2.  **Create and activate a virtual environment with `uv`:**
+2. **Create and activate a virtual environment with `uv`:**
+
     ```bash
     uv venv
     source .venv/bin/activate
     ```
 
-3.  **Install dependencies with `uv`:**
+3. **Install dependencies with `uv`:**
+
     ```bash
     uv pip install -r requirements.txt
     ```
 
-4.  **Create a `.env` file** in the `video_search_agent` directory with the following content, filling in your Google Cloud project details:
-    ```
+4. **Create a `.env` file** in the `video_search_agent` directory with the following content, filling in your Google Cloud project details:
+
+    ```env
     GOOGLE_GENAI_USE_VERTEXAI=True
     GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
     GOOGLE_CLOUD_LOCATION="us-central1"
@@ -192,7 +196,8 @@ python scripts/test_video_intelligence_stt.py \
     BIGQUERY_TABLE_IDS="videos_metadata,video_segments,video_embeddings"
     ```
 
-5.  **Run the agent:**
+5. **Run the agent:**
+
     ```bash
     adk web
     ```
