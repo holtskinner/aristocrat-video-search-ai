@@ -4,7 +4,7 @@ import argparse
 from google.cloud import videointelligence
 
 
-def transcribe_with_video_intelligence(video_uri: str):
+def transcribe_with_video_intelligence(video_uri: str) -> None:
     """Transcribes speech from a video stored on GCS using the
     Video Intelligence API.
 
@@ -96,7 +96,7 @@ def transcribe_with_video_intelligence(video_uri: str):
         traceback.print_exc()
 
 
-def main():
+def main() -> None:
     """Main function to parse arguments."""
     parser = argparse.ArgumentParser(
         description="Test speech transcription using the Video Intelligence API."

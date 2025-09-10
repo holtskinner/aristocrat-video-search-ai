@@ -1,5 +1,3 @@
-# scripts/run_ingestion.py
-
 import argparse
 import json
 import os
@@ -16,8 +14,8 @@ from google.api_core.exceptions import GoogleAPICallError
 from google.cloud import speech_v2, storage
 from google.cloud import videointelligence_v1p3beta1 as videointelligence
 
-from .config import RECOGNIZER_ID, SUPPORTED_VIDEO_FORMATS
-from .path_utils import get_derived_paths, parse_gcs_uri
+from scripts.config import RECOGNIZER_ID, SUPPORTED_VIDEO_FORMATS
+from scripts.path_utils import get_derived_paths, parse_gcs_uri
 
 
 # The following functions are correct and unchanged.
@@ -328,7 +326,7 @@ def consolidate_data(
 # ---- END OF CORRECTED FUNCTION ----
 
 
-def save_to_gcs(data: dict, output_uri: str):
+def save_to_gcs(data: dict, output_uri: str) -> None:
     print(f"\n💾 Saving processed data to {output_uri}")
     bucket_name, blob_name = parse_gcs_uri(output_uri)
     client = storage.Client()
@@ -338,7 +336,7 @@ def save_to_gcs(data: dict, output_uri: str):
     print("✅ Saved successfully.")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Process a video for the Video Search AI system."
     )

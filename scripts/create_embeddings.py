@@ -13,7 +13,7 @@ def create_embeddings(
     bq_connection_name: str,
     text_column: str = "combined_text",
     primary_key: str = "segment_id",
-):
+) -> None:
     """Creates a remote model in BigQuery and then uses it to generate text
     embeddings, storing them in a new table.
 
@@ -115,7 +115,7 @@ def create_embeddings(
         raise
 
 
-def main():
+def main() -> None:
     """Main function to parse arguments and run the embedding creation."""
     parser = argparse.ArgumentParser(
         description="Generate text embeddings using BigQuery ML."

@@ -2,8 +2,8 @@
 
 from google.adk.agents import LlmAgent
 
-from .prompts import root_agent_prompt
-from .tools.data_engineer import data_engineer
+from video_search_agent.prompts import root_agent_prompt
+from video_search_agent.tools.data_engineer import data_engineer
 
 # The main agent for the video search system.
 root_agent = LlmAgent(

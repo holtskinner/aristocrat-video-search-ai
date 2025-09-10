@@ -9,16 +9,16 @@ from google.cloud.exceptions import BadRequest, NotFound
 from google.genai.types import Content, GenerateContentConfig, Part
 from pydantic import BaseModel, Field
 
-from ..config import (
+from video_search_agent.config import (
     BIGQUERY_DATASET_ID,
     DATA_ENGINEER_MODEL_ID,
     GOOGLE_CLOUD_LOCATION,
     GOOGLE_CLOUD_PROJECT,
 )
-from ..prompts.data_engineer import (
+from video_search_agent.prompts.data_engineer import (
     SYSTEM_INSTRUCTION as data_engineer_instruction_template,
 )
-from .utils import get_genai_client
+from video_search_agent.tools.utils import get_genai_client
 
 # --- Configuration for SQL Correction ---
 SQL_CORRECTOR_MODEL_ID = DATA_ENGINEER_MODEL_ID

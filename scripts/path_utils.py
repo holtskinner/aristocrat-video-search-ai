@@ -3,7 +3,7 @@
 
 import os
 
-from .config import SUPPORTED_VIDEO_FORMATS
+from scripts.config import SUPPORTED_VIDEO_FORMATS
 
 
 def parse_gcs_uri(uri: str) -> tuple:

@@ -20,7 +20,7 @@ class VideoIndexerBQ:
         self.segments_table = "video_segments"
         self.videos_table = "videos_metadata"
 
-    def setup_bigquery_schema(self):
+    def setup_bigquery_schema(self) -> None:
         """Create BigQuery dataset and tables optimized for ADK queries."""
         # Create dataset
         dataset_id = f"{self.project_id}.{self.dataset_id}"
@@ -250,13 +250,13 @@ class VideoIndexerBQ:
         # Create search views
         self._create_search_views()
 
-    def _create_search_views(self):
+    def _create_search_views(self) -> None:
         """Create simplified views for ADK agent queries."""
         # Main search view
         search_view_id = f"{self.project_id}.{self.dataset_id}.search_view"
         search_view_query = f"""
         CREATE OR REPLACE VIEW `{search_view_id}` AS
-        SELECT 
+        SELECT
             s.video_title,
             s.speaker_tag,
             s.start_time_seconds,
@@ -268,27 +268,27 @@ class VideoIndexerBQ:
             ARRAY_TO_STRING(s.keywords, ', ') as keywords_list,
             ARRAY_TO_STRING(s.topics, ', ') as topics_list,
             s.word_count,
-            
+
             -- Formatted references
             CONCAT(
-                'Video: ', s.video_title, 
-                ' | Time: ', CAST(ROUND(s.start_time_seconds) AS STRING), 
+                'Video: ', s.video_title,
+                ' | Time: ', CAST(ROUND(s.start_time_seconds) AS STRING),
                 '-', CAST(ROUND(s.end_time_seconds) AS STRING), 's',
                 ' | Speaker: ', CAST(s.speaker_tag AS STRING)
             ) as segment_reference,
-            
+
             -- Direct link to video with timestamp
             CONCAT(
                 'https://storage.cloud.google.com/',
                 SUBSTR(s.video_gcs_uri, 6),
                 '#t=', CAST(ROUND(s.start_time_seconds) AS STRING)
             ) as video_link,
-            
+
             -- Metadata
             v.total_speakers,
             v.has_diarization,
             s.indexed_at
-            
+
         FROM `{self.project_id}.{self.dataset_id}.{self.segments_table}` s
         JOIN `{self.project_id}.{self.dataset_id}.{self.videos_table}` v
         ON s.video_id = v.video_id
@@ -299,7 +299,7 @@ class VideoIndexerBQ:
         speaker_view_id = f"{self.project_id}.{self.dataset_id}.speaker_summary"
         speaker_view_query = f"""
         CREATE OR REPLACE VIEW `{speaker_view_id}` AS
-        SELECT 
+        SELECT
             video_title,
             speaker_tag,
             COUNT(*) as segment_count,
@@ -317,7 +317,7 @@ class VideoIndexerBQ:
         topics_view_id = f"{self.project_id}.{self.dataset_id}.topics_overview"
         topics_view_query = f"""
         CREATE OR REPLACE VIEW `{topics_view_id}` AS
-        SELECT 
+        SELECT
             topic,
             COUNT(DISTINCT video_id) as video_count,
             COUNT(*) as segment_count,
@@ -504,7 +504,7 @@ class VideoIndexerBQ:
 
         return video_id
 
-    def _insert_segments(self, segments: list[dict]):
+    def _insert_segments(self, segments: list[dict]) -> None:
         """Insert segments to BigQuery."""
         table_id = f"{self.project_id}.{self.dataset_id}.{self.segments_table}"
         errors = self.bq_client.insert_rows_json(table_id, segments)
@@ -639,9 +639,7 @@ class VideoIndexerBQ:
 
         # Get top keywords by frequency
         sorted_words = sorted(word_count.items(), key=lambda x: x[1], reverse=True)
-        keywords = [word for word, count in sorted_words[:max_keywords]]
-
-        return keywords
+        return [word for word, count in sorted_words[:max_keywords]]
 
     def _identify_topics(self, text: str) -> list[str]:
         """Identify high-level topics from text."""
@@ -690,14 +688,14 @@ class VideoIndexerBQ:
 
         return topics[:10]  # Limit to 10 topics per segment
 
-    def _print_sample_queries(self, video_id: str, video_title: str):
+    def _print_sample_queries(self, video_id: str, video_title: str) -> None:
         """Print sample BigQuery queries for ADK agent."""
         print("\n📝 Sample queries for ADK Agent:")
         print("-" * 60)
 
         print(f"""
 -- Find mentions of a specific topic in this video
-SELECT 
+SELECT
     segment_reference,
     transcript,
     keywords_list,
@@ -708,7 +706,7 @@ WHERE video_title = '{video_title}'
 ORDER BY start_time_seconds;
 
 -- Search across all videos for a keyword
-SELECT 
+SELECT
     video_title,
     segment_reference,
     transcript,
@@ -720,7 +718,7 @@ LIMIT 20;
 """)
 
 
-def main():
+def main() -> None:
     """Main function to index videos."""
     import argparse
 

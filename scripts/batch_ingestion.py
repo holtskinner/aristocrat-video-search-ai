@@ -48,7 +48,7 @@ def get_unprocessed_videos(bucket_name: str) -> tuple:
     return unprocessed_paths, raw_videos
 
 
-def list_bucket_contents(bucket_name: str):
+def list_bucket_contents(bucket_name: str) -> None:
     # This function is correct and unchanged
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -64,7 +64,7 @@ def list_bucket_contents(bucket_name: str):
 
 def process_video(
     video_path: str, bucket_name: str, project_id: str, location: str, skip_ocr: bool
-):
+) -> bool | None:
     """Process a single video by calling the run_ingestion.py script."""
     video_uri = f"gs://{bucket_name}/{video_path}"
     paths = get_derived_paths(video_uri)
@@ -112,7 +112,7 @@ def process_video(
 
 
 # The main() function is correct and remains the same as the previous version.
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Batch process all videos in a GCS bucket /raw folder."
     )
