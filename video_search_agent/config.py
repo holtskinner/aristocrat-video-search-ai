@@ -1,6 +1,7 @@
 # video_search_agent/config.py
 
 import os
+
 from dotenv import load_dotenv
 
 # --- Load Environment Variables ---
@@ -22,12 +23,14 @@ if not BIGQUERY_DATASET_ID:
 
 # Fetches the list of queryable table IDs from the environment.
 # The string is split into a Python list, providing a typed configuration value.
-BIGQUERY_TABLE_IDS = os.environ.get("BIGQUERY_TABLE_IDS", "").split(',')
+BIGQUERY_TABLE_IDS = os.environ.get("BIGQUERY_TABLE_IDS", "").split(",")
 
 # --- Model Configuration ---
 ROOT_AGENT_MODEL_ID = "gemini-2.5-pro"
 DATA_ENGINEER_MODEL_ID = "gemini-2.5-pro"
 
 # --- Vertex AI Settings ---
-GOOGLE_GENAI_USE_VERTEXAI = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "False").lower() == "true"
+GOOGLE_GENAI_USE_VERTEXAI = (
+    os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "False").lower() == "true"
+)
 GOOGLE_CLOUD_LOCATION = os.environ.get("GOOGLE_CLOUD_LOCATION", "")

@@ -1,20 +1,21 @@
 # scripts/test_video_intelligence_stt.py
 import argparse
+
 from google.cloud import videointelligence
 
+
 def transcribe_with_video_intelligence(video_uri: str):
-    """
-    Transcribes speech from a video stored on GCS using the
+    """Transcribes speech from a video stored on GCS using the
     Video Intelligence API.
 
     Args:
         video_uri (str): The GCS URI of the video file.
     """
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎬 VIDEO INTELLIGENCE API - SPEECH TRANSCRIPTION TEST")
-    print("="*60)
+    print("=" * 60)
     print(f"📹 Video URI: {video_uri}")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     try:
         video_client = videointelligence.VideoIntelligenceServiceClient()
@@ -25,7 +26,7 @@ def transcribe_with_video_intelligence(video_uri: str):
         # Configure the speech transcription specific settings
         config = videointelligence.SpeechTranscriptionConfig(
             language_code="en-US",
-            enable_automatic_punctuation=True
+            enable_automatic_punctuation=True,
             # Note: Diarization can also be enabled here if needed
             # enable_speaker_diarization=True,
             # diarization_speaker_count=2,
@@ -37,7 +38,9 @@ def transcribe_with_video_intelligence(video_uri: str):
         )
 
         print("🚀 Submitting video annotation request...")
-        print("   (This can take a significant amount of time, similar to the other method)")
+        print(
+            "   (This can take a significant amount of time, similar to the other method)"
+        )
 
         # Start the annotation process
         operation = video_client.annotate_video(
@@ -52,11 +55,11 @@ def transcribe_with_video_intelligence(video_uri: str):
         print("⏳ Waiting for transcription to complete...")
 
         # Wait for the operation to complete
-        result = operation.result(timeout=3600) # 1 hour timeout
+        result = operation.result(timeout=3600)  # 1 hour timeout
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ TRANSCRIPTION COMPLETE!")
-        print("="*60)
+        print("=" * 60)
 
         # A single video is processed, so there's generally one result.
         annotation_results = result.annotation_results[0]
@@ -69,15 +72,17 @@ def transcribe_with_video_intelligence(video_uri: str):
         for speech_transcription in annotation_results.speech_transcriptions:
             # Each transcription may have multiple alternatives.
             for i, alternative in enumerate(speech_transcription.alternatives):
-                print(f"\n--- TRANSCRIPT ALTERNATIVE #{i+1} ---")
+                print(f"\n--- TRANSCRIPT ALTERNATIVE #{i + 1} ---")
                 print(f"Confidence: {alternative.confidence:.2%}")
                 print(f"Transcript: {alternative.transcript}\n")
 
                 print("Word-level details:")
                 if not alternative.words:
-                    print("  (No word-level information available for this alternative)")
+                    print(
+                        "  (No word-level information available for this alternative)"
+                    )
                     continue
-                
+
                 for word_info in alternative.words:
                     word = word_info.word
                     start_time = word_info.start_time.total_seconds()
@@ -87,7 +92,9 @@ def transcribe_with_video_intelligence(video_uri: str):
     except Exception as e:
         print(f"\n❌ An error occurred: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 def main():
     """Main function to parse arguments."""
@@ -103,6 +110,7 @@ def main():
     args = parser.parse_args()
 
     transcribe_with_video_intelligence(args.video_uri)
+
 
 if __name__ == "__main__":
     main()

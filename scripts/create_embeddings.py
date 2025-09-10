@@ -1,7 +1,9 @@
 # scripts/create_embeddings.py
 import argparse
-from google.cloud import bigquery
+
 from google.api_core.exceptions import GoogleAPICallError
+from google.cloud import bigquery
+
 
 def create_embeddings(
     project_id: str,
@@ -10,10 +12,9 @@ def create_embeddings(
     target_table_name: str,
     bq_connection_name: str,
     text_column: str = "combined_text",
-    primary_key: str = "segment_id"
+    primary_key: str = "segment_id",
 ):
-    """
-    Creates a remote model in BigQuery and then uses it to generate text
+    """Creates a remote model in BigQuery and then uses it to generate text
     embeddings, storing them in a new table.
 
     Args:
@@ -25,15 +26,15 @@ def create_embeddings(
         text_column (str): The column containing the text to embed.
         primary_key (str): The unique identifier column for each segment.
     """
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🧠 BIGQUERY EMBEDDING GENERATION")
-    print("="*60)
+    print("=" * 60)
     print(f"🏢 Project: {project_id}")
     print(f"📦 Dataset: {dataset_name}")
     print(f"📖 Source Table: {source_table_name}")
     print(f"🎯 Target Table: {target_table_name}")
     print(f"🔌 BQ Connection: {bq_connection_name}")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     client = bigquery.Client(project=project_id)
 
@@ -44,7 +45,7 @@ def create_embeddings(
     vertex_model_name = "text-embedding-004"
 
     print(f"1. Ensuring BigQuery model '{model_id}' exists...")
-    
+
     create_model_query = f"""
     CREATE OR REPLACE MODEL {model_id}
     REMOTE WITH CONNECTION {connection_id}
@@ -53,11 +54,13 @@ def create_embeddings(
 
     try:
         model_job = client.query(create_model_query)
-        model_job.result() # Wait for the model creation to complete
+        model_job.result()  # Wait for the model creation to complete
         print("   ✅ Model created/verified successfully.")
     except GoogleAPICallError as e:
         print(f"\n❌ Failed to create or replace the BigQuery remote model: {e}")
-        print("   Please ensure the BigQuery Connection is correctly set up in the 'us' region.")
+        print(
+            "   Please ensure the BigQuery Connection is correctly set up in the 'us' region."
+        )
         raise
 
     # --- Step 2: Generate Embeddings Using the New Model ---
@@ -65,7 +68,7 @@ def create_embeddings(
     target_table_id = f"`{project_id}.{dataset_name}.{target_table_name}`"
 
     print(f"\n2. Generating embeddings using model '{model_id}'...")
-    
+
     # Corrected the SELECT statement to use the correct column name 'text_embedding'
     generate_embeddings_query = f"""
     CREATE OR REPLACE TABLE {target_table_id} AS
@@ -95,14 +98,14 @@ def create_embeddings(
         embedding_job = client.query(generate_embeddings_query)
         embedding_job.result()
 
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("✅ EMBEDDING GENERATION COMPLETE!")
-        print("="*60)
-        
+        print("=" * 60)
+
         target_table = client.get_table(target_table_id.replace("`", ""))
         print(f"   Table '{target_table_name}' created/updated successfully.")
         print(f"   Total rows (embeddings created): {target_table.num_rows}")
-        print("="*60 + "\n")
+        print("=" * 60 + "\n")
 
     except GoogleAPICallError as e:
         print(f"\n❌ A BigQuery API error occurred during embedding generation: {e}")
@@ -110,6 +113,7 @@ def create_embeddings(
     except Exception as e:
         print(f"\n❌ An unexpected error occurred: {e}")
         raise
+
 
 def main():
     """Main function to parse arguments and run the embedding creation."""
@@ -144,7 +148,7 @@ def main():
         "--bq_connection_name",
         type=str,
         required=True,
-        help="The ID of the BigQuery Connection (must be in 'us-central1' region)."
+        help="The ID of the BigQuery Connection (must be in 'us-central1' region).",
     )
     args = parser.parse_args()
 
@@ -153,9 +157,9 @@ def main():
         dataset_name=args.dataset,
         source_table_name=args.source_table,
         target_table_name=args.target_table,
-        bq_connection_name=args.bq_connection_name
+        bq_connection_name=args.bq_connection_name,
     )
+
 
 if __name__ == "__main__":
     main()
-

@@ -1,14 +1,12 @@
 # video_search_agent/tools/data_engineer.py
 
-import json
 import uuid
 from functools import cache
-from typing import Tuple
 
 from google.adk.tools import ToolContext
 from google.cloud.bigquery import Client, QueryJobConfig
 from google.cloud.exceptions import BadRequest, NotFound
-from google.genai.types import Content, GenerateContentConfig, Part, SafetySetting
+from google.genai.types import Content, GenerateContentConfig, Part
 from pydantic import BaseModel, Field
 
 from ..config import (
@@ -17,7 +15,9 @@ from ..config import (
     GOOGLE_CLOUD_LOCATION,
     GOOGLE_CLOUD_PROJECT,
 )
-from ..prompts.data_engineer import SYSTEM_INSTRUCTION as data_engineer_instruction_template
+from ..prompts.data_engineer import (
+    SYSTEM_INSTRUCTION as data_engineer_instruction_template,
+)
 from .utils import get_genai_client
 
 # --- Configuration for SQL Correction ---
@@ -33,20 +33,23 @@ Your entire output must be a JSON object containing only the corrected SQL query
 {table_metadata}
 """
 
+
 # --- Pydantic Model for Structured Output ---
 class SQLResult(BaseModel):
     sql_query: str = Field(description="The final, valid BigQuery SQL query.")
-    error: str = Field(default="", description="Any errors encountered during the process.")
+    error: str = Field(
+        default="", description="Any errors encountered during the process."
+    )
+
 
 # --- Helper Functions ---
 @cache
 def _get_bigquery_client():
     return Client(project=GOOGLE_CLOUD_PROJECT, location=GOOGLE_CLOUD_LOCATION)
 
+
 def get_bigquery_schema() -> str:
-    """
-    Fetches the schema for all tables in a BigQuery dataset.
-    """
+    """Fetches the schema for all tables in a BigQuery dataset."""
     print(f"Fetching schema for dataset: {GOOGLE_CLOUD_PROJECT}.{BIGQUERY_DATASET_ID}")
     client = _get_bigquery_client()
     query = f"""
@@ -75,18 +78,22 @@ def get_bigquery_schema() -> str:
         print(f"Error fetching BigQuery schema: {e}")
         return ""
 
-def _sql_validator(sql_code: str) -> Tuple[str, str]:
-    print(f"--- Running SQL Validator on: ---\n{sql_code}\n---------------------------------")
+
+def _sql_validator(sql_code: str) -> tuple[str, str]:
+    print(
+        f"--- Running SQL Validator on: ---\n{sql_code}\n---------------------------------"
+    )
     try:
         client = _get_bigquery_client()
         job_config = QueryJobConfig(dry_run=True, use_query_cache=False)
         client.query(sql_code, job_config=job_config).result()
     except (BadRequest, NotFound) as ex:
-        err_text = getattr(ex, 'message', str(ex))
+        err_text = getattr(ex, "message", str(ex))
         print(f"SQL Validation ERROR: {err_text}")
         return f"ERROR: {err_text}", sql_code
     print("SQL Validation SUCCESS")
     return "SUCCESS", sql_code
+
 
 # --- Main Tool Function ---
 async def data_engineer(request: str, tool_context: ToolContext) -> dict:
@@ -96,12 +103,10 @@ async def data_engineer(request: str, tool_context: ToolContext) -> dict:
     dataset_id_formatted = f"`{GOOGLE_CLOUD_PROJECT}.{BIGQUERY_DATASET_ID}`"
 
     data_engineer_instruction = data_engineer_instruction_template.format(
-        table_metadata=table_metadata,
-        dataset_id=dataset_id_formatted
+        table_metadata=table_metadata, dataset_id=dataset_id_formatted
     )
     sql_correction_instruction = sql_correction_instruction_template.format(
-        table_metadata=table_metadata,
-        dataset_id=dataset_id_formatted
+        table_metadata=table_metadata, dataset_id=dataset_id_formatted
     )
 
     client = get_genai_client()
@@ -127,7 +132,9 @@ async def data_engineer(request: str, tool_context: ToolContext) -> dict:
     is_valid = False
     chat_session = None
     for attempt in range(MAX_FIX_ATTEMPTS):
-        print(f"Step 3: Validating SQL query (attempt {attempt + 1}/{MAX_FIX_ATTEMPTS})...")
+        print(
+            f"Step 3: Validating SQL query (attempt {attempt + 1}/{MAX_FIX_ATTEMPTS})..."
+        )
         validator_result, sql_to_validate = _sql_validator(sql_to_validate)
         if validator_result == "SUCCESS":
             is_valid = True
@@ -153,7 +160,9 @@ async def data_engineer(request: str, tool_context: ToolContext) -> dict:
         sql_file_name = f"query_{uuid.uuid4().hex}.sql"
         await tool_context.save_artifact(
             sql_file_name,
-            Part.from_bytes(mime_type="text/x-sql", data=sql_to_validate.encode("utf-8"))
+            Part.from_bytes(
+                mime_type="text/x-sql", data=sql_to_validate.encode("utf-8")
+            ),
         )
         try:
             print("Step 4: Executing SQL query...")
@@ -161,7 +170,7 @@ async def data_engineer(request: str, tool_context: ToolContext) -> dict:
             query_job = bigquery_client.query(sql_to_validate)
             results_df = query_job.to_dataframe()
             print("Step 5: Returning results.")
-            return {"query_result": results_df.to_dict(orient='records')}
+            return {"query_result": results_df.to_dict(orient="records")}
         except Exception as e:
             error_message = f"Failed to execute query: {e}"
             print(error_message)

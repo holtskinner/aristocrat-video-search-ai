@@ -1,8 +1,9 @@
 # video_search_agent/agent.py
 
 from google.adk.agents import LlmAgent
-from .tools.data_engineer import data_engineer
+
 from .prompts import root_agent_prompt
+from .tools.data_engineer import data_engineer
 
 # The main agent for the video search system.
 root_agent = LlmAgent(
@@ -12,5 +13,5 @@ root_agent = LlmAgent(
     tools=[
         data_engineer,
     ],
-    description="An agent that can answer questions about a video library by querying a BigQuery database."
+    description="An agent that can answer questions about a video library by querying a BigQuery database.",
 )

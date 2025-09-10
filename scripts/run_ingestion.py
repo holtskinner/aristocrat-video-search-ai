@@ -39,14 +39,14 @@ def extract_audio_from_video(
     if audio_blob.exists() and not force_reextract:
         print(f"✅ Audio file already exists: {audio_uri}")
         audio_blob.reload()
-        print(f"   Size: {audio_blob.size / (1024*1024):.2f} MB")
+        print(f"   Size: {audio_blob.size / (1024 * 1024):.2f} MB")
         return audio_uri
     video_blob = bucket.blob(video_blob_name)
     if not video_blob.exists():
         raise FileNotFoundError(f"Video file not found: {video_uri}")
     video_blob.reload()
     video_size_mb = video_blob.size / (1024 * 1024) if video_blob.size else 0
-    print(f"📥 Downloading video for audio extraction...")
+    print("📥 Downloading video for audio extraction...")
     print(f"   Video size: {video_size_mb:.2f} MB")
     with tempfile.NamedTemporaryFile(suffix=video_ext, delete=False) as temp_video:
         start_time = time.time()
@@ -75,11 +75,11 @@ def extract_audio_from_video(
         video.close()
         audio_size = os.path.getsize(temp_audio_path)
         print(
-            f"   Audio extracted: {audio_size / (1024*1024):.2f} MB in {extraction_time:.1f} seconds"
+            f"   Audio extracted: {audio_size / (1024 * 1024):.2f} MB in {extraction_time:.1f} seconds"
         )
         if audio_size == 0:
             raise ValueError("Extracted audio file is empty")
-        print(f"📤 Uploading audio to GCS...")
+        print("📤 Uploading audio to GCS...")
         start_time = time.time()
         audio_blob.upload_from_filename(temp_audio_path)
         upload_time = time.time() - start_time
@@ -202,7 +202,7 @@ def transcribe_audio(
         while not operation.done():
             if time.time() - last_update > 30:
                 print(
-                    f"\n   Still processing... ({ (time.time() - start_time) / 60:.1f} minutes elapsed)"
+                    f"\n   Still processing... ({(time.time() - start_time) / 60:.1f} minutes elapsed)"
                 )
                 print("   Progress: ", end="", flush=True)
                 dots = 0
@@ -235,7 +235,7 @@ def transcribe_audio(
 
 
 def extract_text_from_frames(video_uri: str) -> list:
-    print(f"\n🔍 Starting OCR text extraction...")
+    print("\n🔍 Starting OCR text extraction...")
     client = videointelligence.VideoIntelligenceServiceClient()
     request = videointelligence.AnnotateVideoRequest(
         input_uri=video_uri, features=[videointelligence.Feature.TEXT_DETECTION]
@@ -252,7 +252,7 @@ def extract_text_from_frames(video_uri: str) -> list:
         while not operation.done():
             if time.time() - last_update > 30:
                 print(
-                    f"\n   Still processing... ({ (time.time() - start_time) / 60:.1f} minutes elapsed)"
+                    f"\n   Still processing... ({(time.time() - start_time) / 60:.1f} minutes elapsed)"
                 )
                 print("   Progress: ", end="", flush=True)
                 dots = 0
@@ -262,7 +262,7 @@ def extract_text_from_frames(video_uri: str) -> list:
                 dots += 1
             time.sleep(10)
         print(
-            f"\n✅ Video annotation finished in {(time.time() - start_time)/60:.1f} minutes"
+            f"\n✅ Video annotation finished in {(time.time() - start_time) / 60:.1f} minutes"
         )
         annotations = operation.result().annotation_results
         all_text = [ann for res in annotations for ann in res.text_annotations]
@@ -277,7 +277,7 @@ def extract_text_from_frames(video_uri: str) -> list:
 def consolidate_data(
     transcription_results: list, ocr_results: list, video_uri: str
 ) -> dict:
-    print(f"\n🔧 Consolidating data into segments...")
+    print("\n🔧 Consolidating data into segments...")
     video_title = os.path.basename(video_uri)
     final_segments = []
     if not transcription_results:
@@ -335,7 +335,7 @@ def save_to_gcs(data: dict, output_uri: str):
     blob = client.bucket(bucket_name).blob(blob_name)
     json_content = json.dumps(data, indent=2)
     blob.upload_from_string(json_content, content_type="application/json")
-    print(f"✅ Saved successfully.")
+    print("✅ Saved successfully.")
 
 
 def main():
