@@ -11,6 +11,7 @@ charset-normalizer==3.4.3
 click==8.2.1
 cloudpickle==3.1.1
 cryptography==45.0.7
+db-dtypes
 decorator==4.0.3
 docstring_parser==0.17.0
 fastapi==0.116.1
